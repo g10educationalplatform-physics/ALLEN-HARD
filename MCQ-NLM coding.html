@@ -1,0 +1,1089 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"> <!-- Added for mobile responsiveness -->
+
+  <title> Quiz – NLM A-II</title>
+  
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      background: #2b3359;
+      color: #f0f0f0;
+    }
+    #logo {
+      display: block;
+      margin: 0 auto 25px;
+      max-width: 180px;
+      width: 80%;
+      height: auto;
+    }
+    #name-container {
+      background: #010d2b;
+      padding: 30px;
+      border-radius: 6px;
+      max-width: 420px;
+      width: 90%;
+      margin: 0 auto;
+    }
+    #name-container input {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0 15px;
+      border: none;
+      border-radius: 4px;
+      font-size: 16px;
+    }
+    #quiz-container { display: none; }
+    .question {
+      border: 1px solid #d4b935;
+      padding: 15px;
+      margin-bottom: 20px;
+      border-radius: 5px;
+      background: #010d2b;
+    }
+    .question h3 { margin: 0 0 10px; }
+    .option-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin: 6px 0;
+      padding: 6px 8px;
+      border-radius: 4px;
+      background: #0a2463;
+      color: #ccc;
+      cursor: pointer;
+    }
+    .option-item input { margin: 0; }
+    .submit-button, .toggle-button, .dontknow-button {
+      margin-top: 10px;
+      padding: 6px 12px;
+      background: #007BFF;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      margin-right: 5px;
+    }
+    .solution {
+      display: none;
+      margin-top: 10px;
+      background: #0a2463;
+      padding: 10px;
+      border-left: 4px solid #28a745;
+    }
+    /* New PPT button style */
+    .ppt-button {
+      margin-top: 8px;
+      padding: 6px 12px;
+      background: #6f42c1;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      display: none; /* hidden by default */
+    }
+    #scorecard {
+      background: #2d2d2d;
+      padding: 15px;
+      border-radius: 6px;
+      margin-top: 30px;
+      display: none;
+    }
+    #timer { font-weight: bold; color: #00ffcc; }
+    #studentPrintName {
+      text-align: center;
+      font-size: 18px;
+      font-weight: bold;
+      margin-top: -15px;
+      margin-bottom: 5px;
+      display: none;
+    }
+    #examDateTime {
+      text-align: center;
+      font-size: 14px;
+      margin-bottom: 20px;
+      display: none;
+    }
+    @media print {
+      body { background: #fff; color: #000; }
+      .submit-button, .dontknow-button, .toggle-button, .ppt-button, #reportBtn, #reportModal {
+        display: none !important;
+      }
+      #name-container { display: none !important; }
+    }
+    #reportBtn {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: #ff4757;
+      color: white;
+      border: none;
+      padding: 12px 18px;
+      border-radius: 50px;
+      cursor: pointer;
+      font-weight: bold;
+      box-shadow: 0px 4px 10px rgba(0,0,0,0.3);
+      z-index: 1000;
+    }
+    #reportModal {
+      display: none;
+      position: fixed;
+      bottom: 80px;
+      right: 20px;
+      background: #1e1e1e;
+      border: 1px solid #444;
+      padding: 15px;
+      border-radius: 8px;
+      width: 260px;
+      z-index: 1001;
+    }
+    #reportModal textarea {
+      width: 100%;
+      height: 80px;
+      padding: 8px;
+      border: none;
+      border-radius: 4px;
+      resize: none;
+      font-size: 14px;
+    }
+    #reportModal button {
+      margin-top: 10px;
+      padding: 8px 12px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    #sendReport { background: #28a745; color: white; }
+    #closeReport { background: #dc3545; color: white; margin-left: 5px; }
+    img { max-width: 100%; height: auto; }
+    @media (max-width: 480px) {
+      .submit-button, .dontknow-button { width: 100%; margin-bottom: 10px; }
+    }
+    #scoreTable { overflow-x: auto; display: block; width: 100%; }
+    .type-label {
+      font-size: 10px;
+      font-weight: bold;
+      color:  #FFD700;
+      margin-bottom: 6px;
+    }
+
+    /* result styles */
+    .correct-option { background-color: #0c4a0d !important; color: white !important; }
+    .wrong-option { background-color: #5c0f09 !important; color: white !important; }
+    .light-correct-option { background-color: #a5d6a7 !important; color: black !important; }
+
+    /* Left-align MathJax display equations */
+    mjx-container[jax="CHTML"][display="true"] {
+      text-align: left !important;
+      margin-left: 10px !important;
+      margin-right: auto !important;
+    }
+
+    .golden-line {
+      border: none;
+      border-top: 2px solid #FFD700; /* Golden color */
+      margin: 10px 0;
+    }
+    .step-title {
+      font-weight: bold;
+      color: #FFD700; /* Golden */
+      margin-top: 8px;
+    }
+
+    .step-content {
+      margin-left: 18px; /* Indent the explanation under each step */
+      margin-bottom: 6px;
+    }
+  </style>
+
+  <!-- MathJax Configuration -->
+  <script>
+   window.MathJax = {
+  tex: {
+    packages: {'[+]': ['ams']},  // needed for harpoons
+    inlineMath: [['\\(','\\)'], ['$', '$']],
+    displayMath: [['$$','$$'], ['\\[','\\]']],
+    processEscapes: true
+  },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] }
+};
+
+
+	const allowedNames = ["Gargi Mohan", "Raktutpaul kashyap","Ayman Ahmed","Joysmita", "Jiten", "Rondeep Kumai", "Rudranshu", "Swarndeep Paul"];  // Add more names here
+  </script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+
+
+</head>
+<body>
+
+<img id="logo" src="https://i.ibb.co/WNZTWPwv/LOGO-PNG-2025-fab.png" alt="Logo" />
+
+<div id="studentPrintName"></div>
+<div id="examDateTime"></div>
+
+<div id="name-container">
+  <h2>Enter your name to begin</h2>
+  <input type="text" id="studentNameInput" placeholder="Your Name" />
+  <button class="submit-button" onclick="startQuiz()">Start Quiz</button>
+</div>
+
+<div id="quiz-container">
+
+  <h2> Quiz – NLM A-II</h2>
+  
+  <p><strong>Time Elapsed:</strong> <span id="timer">00:00</span></p>
+  <div id="questions-container"></div>
+
+  <div style="margin-top:30px;">
+    <button class="submit-button" onclick="finalSubmit()">Final Submit</button>
+    <button class="submit-button" onclick="printQuestions()">Print Questions</button>
+    <button class="submit-button" id="printScoreBtn" onclick="printScorecard()" style="display:none;">Save or Print Scorecard</button>
+    <button class="submit-button" id="shareWhatsappBtn" style="display:none;">SHARE on WhatsApp</button>
+  </div>
+
+  <div id="scorecard">
+    <h3>Your Scorecard</h3>
+    <p id="scoreText"></p>
+    <table id="scoreTable" border="1" cellspacing="0" cellpadding="6" style="border-collapse:collapse; margin-top:15px;">
+      <thead style="background:#333;color:#fff;">
+        <tr>
+          <th>Q.No</th>
+          <th>Question</th>
+          <th>Your Answer</th>
+          <th>Correct Answer</th>
+          <th>Result</th>
+          <th>Solution</th>
+          <th>Marks</th>
+        </tr>
+      </thead>
+      <tbody id="scoreDetails"></tbody>
+    </table>
+  </div>
+</div>
+
+<button id="reportBtn">Report Mistake / Have a Doubt</button>
+
+<div id="reportModal">
+  <textarea id="reportMsg" placeholder="Describe the mistake..."></textarea>
+  <div style="text-align:right;">
+    <button id="sendReport">Send</button>
+    <button id="closeReport">Close</button>
+  </div>
+</div>
+
+<script>
+/* === Quiz data === */
+const Q = [
+ {
+  "id": "q_newton3",
+  "text": "Consider a block suspended from a light string. Which of the following pairs of forces constitute Newton's third law pair?",
+  "image": "https://i.ibb.co/C3zmkDN2/1.jpg",
+  "options": [
+    "A) Force with which string pulls on the ceiling and the force with which string pulls on block",
+    "B) Force with which string pulls on the block and weight of the block",
+    "C) Force acting on block due to the earth and force the block exerts on the earth",
+    "D) Force with which block pulls on string and force with which the string pulls on the block"
+  ],
+  "correct": ["C","D"],
+  "solution": "According to Newton's third law, every action has an equal and opposite reaction acting on two different bodies. The force exerted by the string on the block and the force exerted by the block on the string form a third law pair because they are equal in magnitude, opposite in direction, and act on different bodies.",
+  
+  "solution_steps": [
+    "Step 1: Identify all the forces acting in the system.",
+    "Weight of the block (W): Gravitational force by Earth acting downward on the block.",
+    "Tension in the string (T): Force by string acting upward on the block.",
+    "Force on the ceiling: Force exerted by the string pulling downward on the ceiling.",
+    "Force on the Earth: Force exerted by the block pulling upward on the Earth (gravitational interaction).",
+    "Force on the string: Force exerted by the block pulling downward on the string.",
+    
+    "Step 2: Evaluate option (A): Force with which string pulls on the ceiling and force with which string pulls on the block.",
+    "These two forces are both applied by the string, but they act on different objects (ceiling and block).",
+    "The correct third-law pair for the string pulling the ceiling is the ceiling pulling the string upward.",
+    "The correct third-law pair for the string pulling the block is the block pulling the string downward.",
+    "Conclusion for option (A): Incorrect.",
+    
+    "Step 3: Evaluate option (B): Force with which string pulls on the block and weight of the block.",
+    "These two forces act on the same object (the block), so they cannot be a Newton's third-law pair.",
+    "Third-law pairs always act on different objects.",
+    "Conclusion for option (B): Incorrect.",
+    
+    "Step 4: Evaluate option (C): Force acting on block due to Earth and force block exerts on Earth.",
+    "Earth pulls on the block (gravitational force downward) and the block pulls back on the Earth (gravitational force upward).",
+    "These forces are equal in magnitude, opposite in direction, and act on different objects.",
+    "This satisfies Newton's third law perfectly.",
+    "Conclusion for option (C): Correct.",
+    
+    "Step 5: Evaluate option (D): Force with which block pulls on string and force with which string pulls on block.",
+    "The block pulls down on the string, and the string pulls up on the block.",
+    "These two forces are equal in magnitude, opposite in direction, and act on different objects.",
+    "This is a textbook example of a Newton's third-law pair.",
+    "Conclusion for option (D): Correct."
+    ]
+  },
+  {
+  "id": "q_block_wedge_2",
+  "text": "Refer the system shown in the figure. Block is sliding down the wedge. All surfaces are frictionless. Find correct statement(s).",
+  "image": "https://i.ibb.co/hFW1mFSf/2.jpg",
+  "options": [
+    "A) Acceleration of block is $g\\sin\\theta$",
+    "B) Acceleration of block is $g\\cos\\theta$",
+    "C) Tension in the string is $mg\\cos^2\\theta$",
+    "D) Tension in the string is $mg\\sin\\theta\\cos\\theta$"
+  ],
+  "correct": "A",
+  "solution": "For a block sliding down a frictionless wedge, the acceleration along the slope is determined solely by the component of gravitational force along the slope. Therefore, the acceleration of the block is $a = g\\sin\\theta$.",
+ "solution_steps": [
+    "Step 1: Identify and Resolve Forces",
+    "Forces on the block: (i) Weight \\(mg\\), vertically downward, (ii) Normal force \\(N\\), perpendicular to the incline.",
+    "Choose axes: one parallel to the incline and one perpendicular to it.",
+    "Resolve weight: (i) Perpendicular component: \\(mg\\cos\\theta\\), balanced by normal force so \\(N = mg\\cos\\theta\\). (ii) Parallel component: \\(mg\\sin\\theta\\), responsible for motion down the incline.",
+    
+    "Step 2: Apply Newton's Second Law",
+    "Newton’s second law: \\(F_{net} = ma\\).",
+    "Along the incline, net force = \\(mg\\sin\\theta\\).",
+    "So, \\(ma = mg\\sin\\theta\\).",
+    
+    "Step 3: Solve for Acceleration",
+    "Cancel \\(m\\) on both sides: \\(a = g\\sin\\theta\\).",
+    "Thus, acceleration of block down the incline is \\(a = g\\sin\\theta\\).",
+    
+    "Step 4: Consider the String",
+    "All surfaces are frictionless. Since the block slides freely down, the string does not apply any force.",
+    "Therefore, tension \\(T = 0\\).",
+    
+    "Final Conclusion",
+    "The correct statement is (A)."
+  ]
+},
+{
+  "id": "q_lift_carpenter",
+  "text": "A carpenter of mass 50 kg is standing on a weighing machine placed in a lift of mass 20 kg. A light string is attached to the lift. The string passes over a smooth pulley and the other end is held by the carpenter as shown. When carpenter keeps the lift moving upward with constant velocity (g = 10 m/s^2) –",
+  "image": "https://i.ibb.co/6cxg0Wzc/3.jpg",
+  "options": [
+    "A) The reading of weighing machine is 15 kg",
+    "B) The man applies a force of 350 N on the string",
+    "C) Net force on the man is 150 N",
+    "D) Net force on the weighing machine is 150 N"
+  ],
+  "correct": ["A","B"],
+  "solution_steps": [
+    "Step 1: Analyze the Entire System",
+    "Mass of the man: \\(m_c = 50\\,\\text{kg}\\).",
+    "Mass of the lift: \\(m_l = 20\\,\\text{kg}\\).",
+    "Total mass: \\(M = m_c + m_l = 50 + 20 = 70\\,\\text{kg}\\).",
+    "Total weight: \\(W_{total} = Mg = 70 \\times 10 = 700\\,\\text{N}\\).",
+    "The man holds the string so a tension \\(T\\) acts upward on both the man and the lift, giving total upward force \\(2T\\).",
+    "For constant velocity (\\(a=0\\)), forces balance: \\(2T = W_{total} = 700\\,\\text{N}\\).",
+    "Thus, \\(T = 350\\,\\text{N}\\). This means the man pulls the string with \\(350\\,\\text{N}\\) → Option (B) is correct.",
+    
+    "Step 2: Analyze Forces on the Man",
+    "Forces on the man: weight \\(W_c = m_c g = 50 \\times 10 = 500\\,\\text{N}\\) downward, tension \\(T = 350\\,\\text{N}\\) upward, and normal force \\(N\\) from the weighing machine upward.",
+    "Net force on man (vertical): \\(T + N - W_c = 0\\) (since \\(a=0\\)).",
+    "Substitute values: \\(350 + N - 500 = 0 \\Rightarrow N = 150\\,\\text{N}\\).",
+    "Weighing machine reading in mass units: \\(N/g = 150/10 = 15\\,\\text{kg}\\). Thus Option (A) is correct.",
+    
+    "Step 3: Check Other Options",
+    "Option (C): Net force on the man is 150 N — Incorrect, because the man moves with constant velocity so net force = 0.",
+    "Option (D): Net force on the weighing machine is 150 N — Incorrect, the weighing machine is in equilibrium as part of the system, net force = 0.",
+    
+    "Final Conclusion",
+    "The correct options are (A) and (B)."
+  ]
+},
+{
+  "id": "q_spring_forces",
+  "text": "The mass in the figure can slide on a frictionless surface. When the mass is pulled out, spring 1 is stretched a distance $x_1$ and spring 2 is stretched a distance $x_2$. The spring constants are $k_1$ and $k_2$ respectively. Magnitude of spring force pulling back on the mass is –",
+  "image": "https://i.ibb.co/sdYGKsSn/4.jpg",
+  "options": [
+    "A) $k_1 x_1$",
+    "B) $k_2 x_2$",
+    "C) $(k_1 x_1 + k_2 x_2)$",
+    "D) $0.5 (k_1 + k_2)(x_1 + x_2)$"
+  ],
+  "correct": ["A", "B"],
+  "solution": "Each spring acts independently on the mass. Spring 1 pulls back with $k_1 x_1$, and spring 2 pulls back with $k_2 x_2$. Therefore, both (A) and (B) correctly represent the forces exerted by the individual springs.",
+  
+  "solution_steps": [
+    "Step 1: Analyze the Problem",
+    "A mass is attached to two springs with constants \\(k_1\\) and \\(k_2\\), stretched by distances \\(x_1\\) and \\(x_2\\).",
+    "If the springs are in parallel, both stretch equally (\\(x_1 = x_2\\)), and the total force would be \\(F_{total} = k_1 x_1 + k_2 x_2\\).",
+    "If the springs are in series, the stretches can differ (\\(x_1 \\neq x_2\\)), but the force through both springs is the same: \\(F_1 = F_2 = F_{total}\\).",
+    "Since the problem states \\(x_1 \\neq x_2\\), it must be a series arrangement.",
+
+    "Step 2: Calculate the Force",
+    "For spring 1: \\(F_1 = k_1 x_1\\).",
+    "For spring 2: \\(F_2 = k_2 x_2\\).",
+    "In series, \\(F_1 = F_2 = F_{total}\\).",
+    "Thus, \\(k_1 x_1 = k_2 x_2 = F_{total}\\).",
+    "So the spring force on the mass can be expressed as either \\(k_1 x_1\\) or \\(k_2 x_2\\).",
+
+    "Step 3: Evaluate the Options",
+    "Option (A): \\(k_1 x_1\\) → Correct, equals the total force in series.",
+    "Option (B): \\(k_2 x_2\\) → Correct, also equals the total force in series.",
+    "Option (C): \\(k_1 x_1 + k_2 x_2\\) → Incorrect, this is valid for parallel springs, not series.",
+    "Option (D): \\(0.5 (k_1 + k_2)(x_1 + x_2)\\) → Incorrect, not meaningful for standard spring systems.",
+
+    "Final Conclusion",
+    "The correct options are (A) and (B)."
+  ]
+},
+{
+  "id": "q_friction_angle_surface",
+  "text": "A block is kept on a rough surface and applied with a horizontal force as shown, which is gradually increasing from zero. The coefficients of static and kinetic friction are $\\mu_s = \\mu_k = \\tfrac{1}{\\sqrt{3}}$. Then –",
+ "image": "https://i.ibb.co/SXwhBZp9/5.jpg",
+ "options": [
+    "A) When $F$ is less than the limiting friction, angle made by net force on the block by the surface is less than $30^\\circ$ with vertical.",
+    "B) When the block is just about to move, the angle made by net force by the surface on the block becomes equal to $30^\\circ$ with vertical.",
+    "C) When the block starts to accelerate, the angle made by net force by the surface on the block becomes constant and equal to $30^\\circ$ vertical.",
+    "D) The angle made by net force with vertical on the block by the surface depends on the mass of the block."
+  ],
+  "correct": ["A", "B", "C", "D"],
+  "solution": "All four options are correct. The solution involves analyzing the forces on the block in three different phases of motion — static, limiting static, and kinetic. The key is that the net force by the surface on the block is the vector sum of the normal reaction and frictional force. The angle θ with the vertical depends on the ratio f/N. In the static phase, θ < 30°, at limiting friction θ = 30°, and in motion θ stays constant at 30°. Since tanθ = f/N = F/mg in the static case, θ also depends on the block’s mass. Hence A, B, C, and D are correct.",
+
+ "solution_steps": [
+    "Step 1: Identify Forces and the Net Surface Force",
+    "The forces acting on the block are the downward weight \\(mg\\), the upward normal force \\(N\\), the horizontal applied force \\(F\\), and the opposing horizontal friction force \\(f\\).",
+    "The \"net force by the surface on the block\" is the vector sum of the normal force and the friction force. Its angle \\(\\theta\\) with the vertical is given by \\(\\tan\\theta = \\tfrac{f}{N}\\).",
+    "Since the surface is horizontal, the normal force is equal to the block's weight, so \\(N = mg\\). The coefficient of friction is \\(\\mu = \\tfrac{1}{\\sqrt{3}}\\).",
+
+    "Step 2: Analyze the Static Phase (\\(F < f_{s,\\text{max}}\\))",
+    "In this phase, the block is stationary, and friction equals the applied force: \\(f = F\\).",
+    "Thus, \\(\\tan\\theta = \\tfrac{F}{mg}\\).",
+    "As \\(F\\) increases from 0, \\(\\theta\\) increases from 0 but remains less than the limiting value of \\(30^\\circ\\). ⇒ Option (A) correct.",
+    "From \\(\\tan\\theta = \\tfrac{F}{mg}\\), \\(\\theta\\) depends on \\(m\\) for a given \\(F\\). ⇒ Option (D) correct.",
+
+    "Step 3: Analyze the Limiting Static Phase (\\(F = f_{s,\\text{max}}\\))",
+    "At this point, the block is just about to move.",
+    "Here, \\(f_{s,\\text{max}} = \\mu_s N = \\mu_s mg = \\tfrac{1}{\\sqrt{3}} mg\\).",
+    "Thus, \\(\\tan\\theta = \\tfrac{f_{s,\\text{max}}}{N} = \\tfrac{(\\tfrac{1}{\\sqrt{3}})mg}{mg} = \\tfrac{1}{\\sqrt{3}}\\), giving \\(\\theta = 30^\\circ\\). ⇒ Option (B) correct.",
+
+    "Step 4: Analyze the Kinetic Phase (\\(F > f_{s,\\text{max}}\\))",
+    "Once the block accelerates, friction becomes kinetic: \\(f_k = \\mu_k N = \\tfrac{1}{\\sqrt{3}} mg\\).",
+    "Then, \\(\\tan\\theta = \\tfrac{f_k}{N} = \\tfrac{(\\tfrac{1}{\\sqrt{3}})mg}{mg} = \\tfrac{1}{\\sqrt{3}}\\).",
+    "This gives a constant angle \\(\\theta = 30^\\circ\\), independent of \\(F\\). ⇒ Option (C) correct.",
+
+    "Final Conclusion",
+    "All four options (A), (B), (C), and (D) are correct."
+  ]
+},
+{
+  "id": "q_block_plank_motion",
+  "text": "A block is placed over a plank. The coefficient of friction between the block and the plank is $\\mu = 0.2$. Initially both are at rest; suddenly the plank starts moving with acceleration $a_0 = 4\\, \\mathrm{m/s^2}$. The displacement of the block in 1 s is ($g = 10\\, \\mathrm{m/s^2}$).",
+  "options": [
+    "A) 1 m relative to ground",
+    "B) 1 m relative to plank",
+    "C) Zero relative to plank",
+    "D) 2 m relative to ground"
+  ],
+  "correct": ["A","B"],
+  "solution": "Maximum frictional acceleration available to the block is $a_f=\\mu g=0.2\\times10=2\\ \\mathrm{m/s^2}$. Since plank's acceleration $a_0=4\\ \\mathrm{m/s^2}>a_f$, the block slips and therefore its acceleration relative to ground is $a=a_f=2\\ \\mathrm{m/s^2}$. In 1 s the block's ground displacement is $s_{block}=\\tfrac{1}{2}at^2=1\\ \\mathrm{m}$ (Option A). The plank's displacement in 1 s is $s_{plank}=\\tfrac{1}{2}a_0t^2=2\\ \\mathrm{m}$, so the block lags the plank by $s_{plank}-s_{block}=1\\ \\mathrm{m}$ — i.e. the block's displacement relative to the plank is 1 m (Option B).",
+  
+  "solution_steps": [
+    "Step 1: Analyze the Forces and Motion of the Block",
+    "The only horizontal force on the block is friction.",
+    "The maximum possible friction force is \\(f_{\\max} = \\mu N = \\mu mg = 0.2 \\times m \\times 10 = 2m\\,\\text{N}\\).",
+    "The maximum acceleration this force can produce is \\(a_{\\text{block,max}} = \\tfrac{f_{\\max}}{m} = \\tfrac{2m}{m} = 2\\,\\text{m/s}^2\\).",
+    "The plank's acceleration is given as \\(a_{\\text{plank}} = 4\\,\\text{m/s}^2\\).",
+    "Since \\(a_{\\text{plank}} > a_{\\text{block,max}}\\), the block will slip on the plank.",
+    "Thus, the block accelerates at its maximum possible rate: \\(a_{\\text{block}} = 2\\,\\text{m/s}^2\\).",
+
+    "Step 2: Calculate Displacement Relative to the Ground",
+    "We use the kinematic equation \\(s = v_0 t + \\tfrac{1}{2} a t^2\\).",
+    "For the block: Initial velocity \\(v_0 = 0\\), acceleration \\(a = 2\\,\\text{m/s}^2\\), time \\(t = 1\\,\\text{s}\\).",
+    "So, \\(s_{\\text{block,ground}} = 0 + \\tfrac{1}{2}(2)(1^2) = 1\\,\\text{m}\\).",
+    "This confirms the displacement of the block relative to the ground is \\(1\\,\\text{m}\\). ⇒ Option (A) correct.",
+
+    "Step 3: Calculate Displacement Relative to the Plank",
+    "For the plank: Acceleration \\(a_{\\text{plank}} = 4\\,\\text{m/s}^2\\), time \\(t = 1\\,\\text{s}\\).",
+    "So, \\(s_{\\text{plank,ground}} = 0 + \\tfrac{1}{2}(4)(1^2) = 2\\,\\text{m}\\).",
+    "The displacement of the block relative to the plank is:",
+    "\\(s_{\\text{block,plank}} = s_{\\text{plank,ground}} - s_{\\text{block,ground}} = 2 - 1 = 1\\,\\text{m}\\).",
+    "This confirms the displacement of the block relative to the plank is \\(1\\,\\text{m}\\). ⇒ Option (B) correct.",
+
+    "Final Conclusion",
+    "Both options (A) and (B) are correct."
+  ]
+},
+{
+  "id": "q_block_rope_climb",
+  "text": "Block B of mass $M=100\\,\\mathrm{kg}$ rests on a rough surface with coefficient of friction $\\mu=\\tfrac{1}{3}$. A rope is tied to block B and passed so that a boy A of mass $m=25\\,\\mathrm{kg}$ climbs the rope (see figure). The maximum acceleration with which the boy can climb the rope without making the block move is —",
+ "image": "https://i.ibb.co/SwBP5x41/7.jpg",
+ "options": [
+    "A) $\\tfrac{3}{4}g$",
+    "B) $\\tfrac{1}{3}g$",
+    "C) $2g$",
+    "D) $\\tfrac{4}{3}g$"
+  ],
+  "correct": "B",
+  "solution": "When the boy climbs with upward acceleration $a$, the tension in the rope is $T=m(g+a)$. The block will remain at rest as long as the horizontal pull $T$ does not exceed the maximum static friction $f_{\\max}=\\mu M g$. Thus the limiting condition is $m(g+a)=\\mu M g$, which gives $a=\\left(\\dfrac{\\mu M}{m}-1\\right)g$. Substituting $\\mu=1/3$, $M=100\\,\\mathrm{kg}$, $m=25\\,\\mathrm{kg}$ gives $\\dfrac{\\mu M}{m}=\\dfrac{(1/3)\\times100}{25}=\\dfrac{4}{3}$, so $a=(4/3-1)g=\\dfrac{1}{3}g$. Hence the maximum allowable acceleration is $a_{\\max}=\\dfrac{1}{3}g$ (Option B).",
+  "solution_steps": [
+    "Step 1: Free-Body Diagram for Block B",
+    "Horizontal forces: tension horizontal component \\(T\\cos(37^\\circ)\\) to the right and static friction \\(f_s\\) to the left.",
+    "Vertical forces: weight \\(m_B g\\) downward, normal reaction \\(N_B\\) upward, and tension vertical component \\(T\\sin(37^\\circ)\\) upward.",
+    "At impending motion (just about to move), static friction is at its maximum: \\(f_{s,\\max}=\\mu N_B\\).",
+
+    "Step 2: Write Equilibrium Equations for Block B (just about to move)",
+    "Vertical balance: \\(N_B + T\\sin(37^\\circ)=m_B g\\) ⇒ \\(N_B = m_B g - T\\sin(37^\\circ)\\).",
+    "Horizontal balance: \\(T\\cos(37^\\circ)=f_{s,\\max}=\\mu N_B\\).",
+
+    "Step 3: Substitute and Solve for \\(T\\)",
+    "Substitute \\(N_B\\) into horizontal equation: \\(T\\cos(37^\\circ)=\\mu (m_B g - T\\sin(37^\\circ))\\).",
+    "Use given values: \\(m_B=100\\,\\text{kg}\\), \\(\\mu=\\tfrac{1}{3}\\), \\(\\cos(37^\\circ)=\\tfrac{4}{5}\\), \\(\\sin(37^\\circ)=\\tfrac{3}{5}\\).",
+    "Thus, \\(T\\left(\\tfrac{4}{5}\\right)=\\tfrac{1}{3}\\bigl(100g - T\\tfrac{3}{5}\\bigr)\\).",
+    "Multiply through to clear fractions (or rearrange):",
+    "\\(\\tfrac{4}{5}T = \\tfrac{100g}{3} - \\tfrac{1}{3}\\cdot\\tfrac{3}{5}T = \\tfrac{100g}{3} - \\tfrac{T}{5}\\).",
+    "Bring \\(T\\) terms together: \\(\\tfrac{4}{5}T + \\tfrac{1}{5}T = \\tfrac{100g}{3}\\) ⇒ \\(T = \\tfrac{100g}{3}\\).",
+    "So the maximum tension is \\(T_{\\max}=\\tfrac{100g}{3}\\).",
+
+    "Step 4: Free-Body Diagram and Equation for Boy A",
+    "For the boy (mass \\(m_A\\)), forces are: upward tension \\(T\\) and weight \\(m_A g\\) downward.",
+    "Newton's second law (upward positive): \\(T - m_A g = m_A a\\).",
+
+    "Step 5: Substitute Values and Solve for \\(a\\)",
+    "Given \\(T=\\tfrac{100g}{3}\\) and \\(m_A=25\\,\\text{kg}\\):",
+    "\\(\\tfrac{100g}{3} - 25g = 25a\\).",
+    "Compute numerator: \\(\\tfrac{100g - 75g}{3} = \\tfrac{25g}{3}\\). So \\(25a = \\tfrac{25g}{3}\\).",
+    "Therefore \\(a = \\tfrac{g}{3}\\).",
+
+    "Final Conclusion",
+    "The maximum upward acceleration of the boy is \\(\\tfrac{g}{3}\\). ⇒ Option (B) is correct."
+  ]
+},
+{
+  "id": "q_block_plank_vt",
+  "text": "A block A is placed over a long rough plank B of the same mass as shown in the figure. The plank is placed over a smooth horizontal surface. At time $t=0$, block A is given a velocity $v_0$ in the horizontal direction (plank B is initially at rest). Let $v_1(t)$ and $v_2(t)$ be the velocities of A and B at time $t$. Choose the correct graph between $v_1$ or $v_2$ and $t$.",
+ "image": "https://i.ibb.co/p9xQBH8/8.jpg",
+ "options": [
+    "A) <img src='https://i.ibb.co/ZRbqkP8Z/8A.jpg' style='max-height:150px;'>",
+    "B) <img src='https://i.ibb.co/mr7PDV85/8B.jpg' style='max-height:150px;'>",
+    "C) <img src='https://i.ibb.co/3mQVYNQn/8C.jpg' style='max-height:150px;'>",
+    "D) <img src='https://i.ibb.co/5gqcZzDK/8D.jpg' style='max-height:150px;'>",
+  ],
+  "correct": "B",
+  "solution": "With no external horizontal force, total momentum is conserved. Kinetic friction between A and B produces equal and opposite constant accelerations on A and B while they slip, so $v_1(t)$ decreases linearly from $v_0$ and $v_2(t)$ increases linearly from 0 until they meet at the common velocity $v_0/2$, after which both move together with constant velocity $v_0/2$. Option B is the graph that correctly shows these linear trends meeting at $v_0/2$ and staying constant afterwards.",
+  
+  "solution_steps": [
+    "Step 1: Analyze the Initial Motion and Forces",
+    "At \\(t=0\\), Block A has initial velocity \\(v_0\\) while Plank B is at rest.",
+    "The surface between A and B is rough, so friction acts: on A it acts opposite to A's motion (decelerating A), and by Newton's third law an equal and opposite friction acts on B (accelerating B).",
+    "Assume kinetic friction is approximately constant during slipping, so both bodies experience (approximately) constant accelerations (opposite signs).",
+
+    "Step 2: Velocity vs time behaviour",
+    "Constant acceleration ⇒ velocities change linearly with time.",
+    "Therefore \\(v_1(t)\\) for Block A is a straight line with negative slope (decreasing from \\(v_0\\)), and \\(v_2(t)\\) for Plank B is a straight line with positive slope (increasing from 0).",
+
+    "Step 3: Final common velocity using momentum conservation",
+    "There is no external horizontal impulse on the system A+B, so total horizontal momentum is conserved.",
+    "Initial momentum: \\(m v_0 + m\\cdot 0 = m v_0\\).",
+    "Final momentum when they move together: \\((m+m) v_{\\text{final}} = 2m v_{\\text{final}}\\).",
+    "Momentum conservation: \\(m v_0 = 2m v_{\\text{final}}\\) ⇒ \\(v_{\\text{final}} = \\tfrac{v_0}{2}\\).",
+
+    "Step 4: Match with graphs",
+    "We need straight-line plots for \\(v_1\\) (starting at \\(v_0\\), decreasing) and \\(v_2\\) (starting at 0, increasing) that meet at the common value \\(v_{\\text{final}} = \\tfrac{v_0}{2}\\).",
+    "The only graph that shows these linear trends and intersection at \\(\\tfrac{v_0}{2}\\) is Graph (B).",
+
+    "Final Conclusion",
+    "Graph (B) is the correct choice."
+  ]
+},
+{
+  "id": "q_man_plank_friction",
+  "text": "A man of mass $50\\,\\mathrm{kg}$ is pulling on a plank of mass $100\\,\\mathrm{kg}$ kept on a smooth floor with a force of $100\\,\\mathrm{N}$. If both the man and plank move together, find the force of friction acting on the man.",
+  "image": "https://i.ibb.co/WWm96whM/9.jpg",
+  "options": [
+    "A) $\\tfrac{100}{3}\\,\\mathrm{N}$ towards left",
+    "B) $\\tfrac{100}{3}\\,\\mathrm{N}$ towards right",
+    "C) $\\tfrac{250}{3}\\,\\mathrm{N}$ towards left",
+    "D) $\\tfrac{250}{3}\\,\\mathrm{N}$ towards right"
+  ],
+  "correct": "A",
+  "solution": "The magnitude of the frictional force on the man is \\(\\tfrac{100}{3}\\,\\text{N}\\) towards the left.",
+ "solution_steps": [
+    "Step 1: Find the acceleration of the system",
+    "Total mass: \\(M_{\\text{total}} = 50\\,\\text{kg} + 100\\,\\text{kg} = 150\\,\\text{kg}\\).",
+    "Net external force: \\(F_{\\text{net}} = 100\\,\\text{N}\\) (to the left).",
+    "Acceleration of system: \\(a = \\tfrac{F_{\\text{net}}}{M_{\\text{total}}} = \\tfrac{100}{150} = \\tfrac{2}{3}\\,\\text{m/s}^2\\) to the left.",
+
+    "Step 2: Force of friction on the man",
+    "The friction on the man provides his horizontal acceleration: \\(F_{\\text{friction on man}} = m_{\\text{man}}\\,a\\).",
+    "Substitute values: \\(F_{\\text{friction on man}} = 50 \\times \\tfrac{2}{3} = \\tfrac{100}{3}\\,\\text{N}\\).",
+    "Hence the frictional force on the man is \\(\\tfrac{100}{3}\\,\\text{N}\\) directed to the left.",
+
+    "Step 3: Direction reasoning",
+    "Since the man and plank accelerate together to the left, the frictional force from the plank on the man's feet must act to the left (it is what drags him along).",
+
+    "Final Conclusion",
+    "The magnitude of the frictional force on the man is \\(\\tfrac{100}{3}\\,\\text{N}\\) towards the left."
+	]
+},
+{
+  "id": "q_truck_box_fall",
+  "text": "The rear side of a truck is open and a box of mass $m=20\\,\\mathrm{kg}$ is placed on the truck $4\\,\\mathrm{m}$ away from the open end. The coefficient of friction between box and truck is $\\mu=0.15$ and $g=10\\,\\mathrm{m/s^2}$. The truck starts from rest with an acceleration $a_{truck}=2\\,\\mathrm{m/s^2}$ on a straight road. The distance moved by the truck when the box starts to fall down is —",
+  "options": [
+    "A) $4\\,\\mathrm{m}$",
+    "B) $8\\,\\mathrm{m}$",
+    "C) $16\\,\\mathrm{m}$",
+    "D) $32\\,\\mathrm{m}$"
+  ],
+  "correct": "C",
+  "solution": "Maximum frictional force is $f_{\\max}=\\mu m g=0.15\\times20\\times10=30\\,\\mathrm{N}$, so the maximum acceleration the box can have due to friction is $a_{box}=f_{\\max}/m=30/20=1.5\\,\\mathrm{m/s^2}$. Since the truck accelerates at $2\\,\\mathrm{m/s^2}>1.5\\,\\mathrm{m/s^2}$, the box will slip backward relative to the truck. Kinetic friction (assumed equal to $\\mu mg$ here) accelerates the box forward at $1.5\\,\\mathrm{m/s^2}$ while the truck goes ahead at $2\\,\\mathrm{m/s^2}$. The relative acceleration of truck with respect to box is $a_{rel}=2-1.5=0.5\\,\\mathrm{m/s^2}$. Starting from rest, the time to cover relative distance $4\\,\\mathrm{m}$ is given by $4=\\tfrac{1}{2}a_{rel}t^2$, so $t=4\\,\\mathrm{s}$. Distance moved by the truck in this time is $s_{truck}=\\tfrac{1}{2}a_{truck}t^2=\\tfrac{1}{2}\\times2\\times4^2=16\\,\\mathrm{m}$. Hence Option (C) is correct.",
+  "solution_steps": [
+    "Step 1: Determine if the box will slide",
+    "Maximum static friction: \\(F_{\\text{friction,max}} = \\mu N = \\mu m_{\\text{box}} g = 0.15 \\times 20 \\times 10 = 30\\,\\text{N}\\).",
+    "Pseudo (inertial) force in truck frame: \\(F_{\\text{pseudo}} = m_{\\text{box}} a_{\\text{truck}} = 20 \\times 2 = 40\\,\\text{N}\\).",
+    "Since \\(F_{\\text{pseudo}} (40\\,\\text{N}) > F_{\\text{friction,max}} (30\\,\\text{N})\\), the box will slip backward relative to the truck.",
+
+    "Step 2: Acceleration of the box (ground frame)",
+    "While slipping, the horizontal force on the box is kinetic friction (forward, relative to ground): \\(F_{\\text{friction}} = 30\\,\\text{N}\\).",
+    "So the box's acceleration (ground frame) is \\(a_{\\text{box}} = \\tfrac{F_{\\text{friction}}}{m_{\\text{box}}} = \\tfrac{30}{20} = \\tfrac{3}{2} = 1.5\\,\\text{m/s}^2\\).",
+
+    "Step 3: Relative acceleration of the box w.r.t. truck",
+    "Relative acceleration: \\(a_{\\text{relative}} = a_{\\text{truck}} - a_{\\text{box}} = 2 - 1.5 = 0.5\\,\\text{m/s}^2\\).",
+    "This is the rate at which the box slides backward inside the truck.",
+
+    "Step 4: Time until the box has moved 4 m relative to the truck",
+    "Use \\(\\Delta x = v_0 t + \\tfrac{1}{2} a_{\\text{relative}} t^2\\) with \\(v_0 = 0\\):",
+    "\\(4 = \\tfrac{1}{2} \\times 0.5 \\times t^2 = 0.25\\,t^2\\).",
+    "Thus \\(t^2 = \\tfrac{4}{0.25} = 16\\) ⇒ \\(t = 4\\,\\text{s}\\).",
+
+    "Step 5: Distance travelled by the truck in this time",
+    "Truck displacement: \\(d_{\\text{truck}} = v_0 t + \\tfrac{1}{2} a_{\\text{truck}} t^2 = 0 + \\tfrac{1}{2} \\times 2 \\times 4^2\\).",
+    "So, \\(d_{\\text{truck}} = 1 \\times 16 = 16\\,\\text{m}\\).",
+
+    "Final Conclusion",
+    "The box falls off after the truck has moved \\(16\\,\\text{m}\\). ⇒ Option (C) is correct."
+  ]
+}
+
+
+
+
+
+
+
+  
+  
+];
+
+/* === State === */
+let student = '';
+let timerHandle;
+let printMode = '';
+let examDateTime = '';
+const quizTitle = document.title;
+
+/* === Start quiz === */
+function startQuiz() {
+  const name = document.getElementById('studentNameInput').value.trim();
+  if (!name) { 
+    alert('Please enter your name.');
+    return;
+  }
+
+  // Check if the name is in the allowed list (case insensitive)
+  const isAllowed = allowedNames.some(allowed => allowed.toLowerCase() === name.toLowerCase());
+  if (!isAllowed) {
+    alert('Access denied! Your name is not register. Please contact your teacher # 08069409455.');
+    return;
+  }
+
+  student = name;
+  examDateTime = new Date().toLocaleString();
+  document.getElementById('name-container').style.display = 'none';
+  document.getElementById('quiz-container').style.display = 'block';
+  buildQuestions();
+  if (window.MathJax && typeof MathJax.typesetPromise === 'function') MathJax.typesetPromise();
+  startTimer();
+}
+
+
+
+/* === Build questions === */
+function buildQuestions() {
+  const out = document.getElementById('questions-container');
+  out.innerHTML = '';
+  Q.forEach((q, index) => {
+    const qText = q.text || '';
+    let entries = q.options.map((opt, i) => [String.fromCharCode(65 + i), opt]);
+    const correct = q.correct;
+    const isMulti = Array.isArray(correct);
+    const inputType = isMulti ? "checkbox" : "radio";
+    const typeLabel = isMulti ? "Multiple Correct" : "Single Correct";
+
+    const optionsHTML = entries.map(([letter, opt]) => {
+      return `<label class="option-item">
+                <input type="${inputType}" id="${q.id}-${letter}" name="${q.id}${isMulti ? '[]' : ''}" value="${letter}" onchange="enableSubmit('${q.id}')">
+                ${letter}. ${opt}
+              </label>`;
+    }).join('');
+
+    // ✅ Only add PPT button if pptUrl exists
+    const pptBtnHTML = q.pptUrl 
+      ? `<button class="ppt-button" id="ppt-${q.id}" onclick="openPPT('${q.pptUrl}')">📑 PPT Presentation</button>`
+      : "";
+
+    // ✅ Add image rendering if available
+    const imgHTML = q.image 
+      ? `<div style="margin:10px 0;"><img src="${q.image}" alt="Question Image"></div>` 
+      : "";
+
+out.insertAdjacentHTML('beforeend', `
+  <div class="question" id="${q.id}-wrap">
+    <h3>Q${index + 1}. ${qText}</h3>
+    ${imgHTML}
+    <div class="type-label">[${typeLabel}]</div>
+    <div class="options">${optionsHTML}</div>
+    <div class="buttons" id="${q.id}-buttons">
+      <button id="sub-${q.id}" class="submit-button" disabled onclick="grade('${q.id}')">Submit</button>
+      <button class="dontknow-button" onclick="skip('${q.id}')">I Don’t Know</button>
+      <button class="toggle-button" id="btn-sol-${q.id}" style="display:none;" onclick="toggleSolution('sol-${q.id}','${q.id}')">Show Solution</button>
+    </div>
+
+    <div class="solution" id="sol-${q.id}">
+      <strong>Solution:</strong> ${q.solution || ''}
+      ${q.solution_steps 
+        ? `<hr class="golden-line"><strong>Solution Steps:</strong>` + 
+          q.solution_steps.map(step => 
+            /^Step\s*\d+/i.test(step) 
+              ? `<p class="step-title">${step}</p>` 
+              : `<p class="step-content">${step}</p>`
+          ).join('') 
+        : '' }
+    </div>
+
+    ${pptBtnHTML}
+  </div>
+`);
+  });
+  if (window.MathJax && typeof MathJax.typesetPromise === 'function') MathJax.typesetPromise();
+}
+
+
+
+/* enable submit */
+function enableSubmit(qid){ document.getElementById(`sub-${qid}`).disabled = false; }
+
+/* open PPT */
+function openPPT(url){ window.open(url,"_blank"); }
+function showPPTButton(qid){ const b=document.getElementById(`ppt-${qid}`); if(b) b.style.display="inline-block"; }
+
+/* grade */
+function grade(qid) {
+  const q = Q.find(x => x.id === qid);
+  if(!q) return;
+  const correct = q.correct;
+  const isMulti = Array.isArray(correct);
+
+  // disable all inputs for this question
+  document.querySelectorAll(`#${qid}-wrap input`).forEach(i => i.disabled = true);
+
+  // show solution and ppt buttons
+  showSolutionButton(qid);
+  showPPTButton(qid);
+
+  // remove any previous classes (in case user graded previously)
+  document.querySelectorAll(`#${qid}-wrap .option-item`).forEach(el => {
+    el.classList.remove('correct-option','wrong-option','light-correct-option');
+  });
+
+  if (!isMulti) {
+    // === Single correct (MCQ) ===
+    const selected = document.querySelector(`#${qid}-wrap input[type="radio"]:checked`);
+
+    q.options.forEach((_, i) => {
+      const letter = String.fromCharCode(65 + i);
+      const optInput = document.getElementById(`${qid}-${letter}`);
+      if (!optInput) return;
+      const label = optInput.parentElement;
+
+      if (letter === correct) {
+        // this is the correct option
+        if (selected && selected.value === letter) {
+          label.classList.add('correct-option'); // selected correct
+        } else {
+          label.classList.add('light-correct-option'); // unselected correct
+        }
+      } else {
+        // not the correct option
+        if (selected && selected.value === letter) {
+          label.classList.add('wrong-option'); // selected wrong
+        }
+      }
+    });
+
+  } else {
+    // === Multiple correct (MSQ) ===
+    const chosen = Array.from(document.querySelectorAll(`#${qid}-wrap input[type="checkbox"]:checked`)).map(i => i.value);
+
+    q.options.forEach((_, i) => {
+      const letter = String.fromCharCode(65 + i);
+      const optInput = document.getElementById(`${qid}-${letter}`);
+      if (!optInput) return;
+      const label = optInput.parentElement;
+
+      if (correct.includes(letter)) {
+        // is a correct option
+        if (chosen.includes(letter)) {
+          label.classList.add('correct-option'); // selected correct
+        } else {
+          label.classList.add('light-correct-option'); // unselected correct
+        }
+      } else {
+        // not correct
+        if (chosen.includes(letter)) {
+          label.classList.add('wrong-option'); // selected wrong
+        }
+      }
+    });
+  }
+
+  // disable submit button after grading
+  const sb = document.getElementById(`sub-${qid}`);
+  if (sb) sb.disabled = true;
+}
+
+
+
+/* skip */
+function skip(qid) {
+  const q = Q.find(x => x.id === qid);
+  if(!q) return;
+  const correct = q.correct;
+  const isMulti = Array.isArray(correct);
+
+  // disable all inputs
+  document.querySelectorAll(`#${qid}-wrap input`).forEach(i => i.disabled = true);
+
+  // show solution and ppt button
+  showSolutionButton(qid);
+  showPPTButton(qid);
+
+  // highlight correct answers
+  document.querySelectorAll(`#${qid}-wrap .option-item`).forEach(el => {
+    el.classList.remove('correct-option','wrong-option','light-correct-option');
+  });
+
+  if (!isMulti) {
+    q.options.forEach((_, i) => {
+      const letter = String.fromCharCode(65 + i);
+      const opt = document.getElementById(`${q.id}-${letter}`);
+      if (opt) opt.parentElement.classList.add('light-correct-option');
+    });
+  } else {
+    q.options.forEach((_, i) => {
+      const letter = String.fromCharCode(65 + i);
+      const opt = document.getElementById(`${q.id}-${letter}`);
+      if (opt && q.correct.includes(letter)) opt.parentElement.classList.add('light-correct-option');
+    });
+  }
+
+  // disable submit button
+  const sb = document.getElementById(`sub-${qid}`);
+  if (sb) sb.disabled = true;
+}
+
+function showSolutionButton(qid){
+  const btn = document.getElementById(`btn-sol-${qid}`);
+  if (btn) btn.style.display = 'inline-block';
+  const buttonsDiv = document.getElementById(`${qid}-buttons`);
+  if (buttonsDiv) buttonsDiv.style.display = 'block';
+}
+
+function toggleSolution(id,qid){
+  const e = document.getElementById(id);
+  e.style.display = e.style.display === 'block' ? 'none' : 'block';
+  if (e.style.display === 'block') showPPTButton(qid);
+}
+
+/* timer, finalSubmit, print, shareOnWhatsApp, report handlers ... updated finalSubmit to apply highlighting */
+/* Timer */
+function startTimer(){
+  const display = document.getElementById('timer');
+  const started = Date.now();
+  timerHandle = setInterval(() => {
+    const s = Math.floor((Date.now() - started) / 1000);
+    display.textContent = `${String((s / 60) | 0).padStart(2,'0')}:${String(s % 60).padStart(2,'0')}`;
+  }, 1000);
+}
+
+/* Final submit & scoring:
+   - Not Attempted (no selections) => 0 marks
+   - MCQ: correct => +4, wrong => -1
+   - MSQ: full correct only => +4, otherwise => -1
+*/
+function finalSubmit(){
+  clearInterval(timerHandle);
+
+  // First, grade every question to show colors
+  Q.forEach(q => {
+    try { grade(q.id); } catch(e) { /* continue */ }
+  });
+
+  // disable inputs and hide per-question buttons
+  document.querySelectorAll("input").forEach(r => r.disabled = true);
+  document.querySelectorAll(".submit-button, .dontknow-button").forEach(b => b.style.display = "none");
+
+  let totalMarks = 0, negativeMarks = 0, possibleMarks = Q.length * 4;
+  let detailHTML = '';
+
+  Q.forEach((q, i) => {
+    const correct = q.correct || q.answer;
+    const isMulti = Array.isArray(correct);
+    let chosenVals = [];
+
+    if (isMulti) {
+      chosenVals = [...document.querySelectorAll(`#${q.id}-wrap input:checked`)].map(x => x.value);
+    } else {
+      const c = document.querySelector(`input[name="${q.id}"]:checked`);
+      if (c) chosenVals = [c.value];
+    }
+
+    let marks = 0, resultText = '';
+
+    if (chosenVals.length === 0) {
+      // Not attempted => 0 marks
+      marks = 0;
+      resultText = "⚪ Not Attempted (0)";
+    } else if (!isMulti) {
+      // MCQ
+      if (chosenVals[0] === correct) { marks = 4; resultText = "✅ Correct (+4)"; }
+      else { marks = -1; resultText = "❌ Incorrect (-1)"; }
+    } else {
+      // MSQ: full correct only -> +4; else -1
+      const correctSet = new Set(correct);
+      const selectedSet = new Set(chosenVals);
+      const isExactlySame = (correctSet.size === selectedSet.size) && [...correctSet].every(v => selectedSet.has(v));
+      if (isExactlySame) { marks = 4; resultText = "✅ Correct (+4)"; }
+      else { marks = -1; resultText = "❌ Incorrect (-1)"; }
+    }
+
+    if (marks > 0) totalMarks += marks; else negativeMarks += marks;
+
+    detailHTML += `<tr>
+      <td>${i + 1}</td>
+      <td>${q.text || q.question}</td>
+      <td>${chosenVals.join(", ") || 'Not Answered'}</td>
+      <td>${isMulti ? correct.join(", ") : correct}</td>
+      <td>${resultText}</td>
+      <td>${q.solution || ''}</td>
+      <td>${marks}</td>
+    </tr>`;
+  });
+
+  const finalScore = totalMarks + negativeMarks;
+  document.getElementById('scoreText').innerHTML = `${student}, here is your result:`;
+  document.getElementById('scoreDetails').innerHTML = detailHTML;
+
+  // Append summary (keeps exactly same behavior as original)
+  document.getElementById('scorecard').insertAdjacentHTML('beforeend', `
+    <div style="margin-top:20px; font-weight:bold;">
+      <p>Total Marks (Possible): ${possibleMarks}</p>
+      <p>Total Marks (Correct Answers): ${totalMarks.toFixed(2)}</p>
+      <p>Negative Marks (Wrong Answers): ${negativeMarks.toFixed(2)}</p>
+      <p>Final Score: ${finalScore.toFixed(2)}</p>
+    </div>
+  `);
+
+  document.getElementById('scorecard').style.display = 'block';
+  const pbtn = document.getElementById('printScoreBtn');
+  const sbtn = document.getElementById('shareWhatsappBtn');
+  if (pbtn) pbtn.style.display = 'inline-block';
+  if (sbtn) sbtn.style.display = 'inline-block';
+
+  if (window.MathJax && typeof MathJax.typesetPromise === 'function') MathJax.typesetPromise();
+}
+
+/* Print handlers */
+function printQuestions(){ printMode = "questions"; window.print(); }
+function printScorecard(){
+  document.getElementById("studentPrintName").innerText = student;
+  document.getElementById("examDateTime").innerText = "Exam Date & Time: " + examDateTime;
+  document.getElementById("studentPrintName").style.display = "block";
+  document.getElementById("examDateTime").style.display = "block";
+  printMode = "scorecard"; window.print();
+}
+
+window.addEventListener('beforeprint', () => {
+  if (printMode === "questions") {
+    document.querySelector("#questions-container").style.display = "block";
+    document.querySelector("#scorecard").style.display = "none";
+    document.querySelector("#logo").style.display = "none";
+    document.querySelector("#name-container").style.display = "none";
+    document.querySelector("#timer").style.display = "none";
+    document.querySelector("#studentPrintName").style.display = "none";
+    document.querySelector("#examDateTime").style.display = "none";
+  }
+  if (printMode === "scorecard") {
+    document.querySelector("#questions-container").style.display = "none";
+    document.querySelector("#scorecard").style.display = "block";
+    document.querySelector("#logo").style.display = "block";
+    document.querySelector("#name-container").style.display = "none";
+    document.querySelector("#studentPrintName").style.display = "block";
+    document.querySelector("#examDateTime").style.display = "block";
+  }
+});
+
+window.addEventListener('afterprint', () => {
+  document.querySelector("#questions-container").style.display = "";
+  document.querySelector("#scorecard").style.display = "";
+  document.querySelector("#logo").style.display = "";
+  document.querySelector("#name-container").style.display = "";
+  document.querySelector("#timer").style.display = "";
+  document.getElementById("studentPrintName").style.display = "none";
+  document.getElementById("examDateTime").style.display = "none";
+  printMode = "";
+});
+
+/* WhatsApp share */
+function shareOnWhatsApp(){
+  const scoreText = document.getElementById('scoreText').innerText;
+  const details = [...document.querySelectorAll('#scoreDetails tr')].map((row, index) => {
+    const cells = row.querySelectorAll('td');
+    return `Q${cells[0].innerText}\nYour Ans: ${cells[2].innerText}\nCorrect Ans: ${cells[3].innerText}\nResult: ${cells[4].innerText}\n`;
+  }).join('\n');
+
+  const msg = `📘 Quiz Title: ${quizTitle}\n👤 Student: ${student}\n\n${scoreText}\n\n${details}`;
+
+  // ✅ Corrected number (example: +91 8069409455 → 918069409455)
+  const phone = "918069409455";  
+
+  window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`, "_blank");
+}
+
+
+document.getElementById('shareWhatsappBtn').onclick = shareOnWhatsApp;
+
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('sendReport').onclick = () => {
+    const msg = document.getElementById('reportMsg').value.trim();
+    if (!msg) { 
+      alert("Write message first"); 
+      return; 
+    }
+    if (!student) {
+      alert("Please start the quiz before reporting.");
+      return;
+    }
+    const payload = `⚠️ Reported Mistake / Have a Doubt\nQuiz: ${quizTitle}\nStudent: ${student}\n\n${msg}`;
+    window.open(`https://wa.me/9108069409455?text=${encodeURIComponent(payload)}`, "_blank");
+    document.getElementById('reportModal').style.display = "none";
+    document.getElementById('reportMsg').value = "";
+  };
+
+  document.getElementById('closeReport').onclick = () => {
+    document.getElementById('reportModal').style.display = "none";
+  };
+
+  document.getElementById('reportBtn').onclick = () => {
+    document.getElementById('reportModal').style.display = "block";
+  };
+});
+
+</script>
+</body>
+</html>
