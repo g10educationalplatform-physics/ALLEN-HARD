@@ -1050,7 +1050,7 @@ function shareOnWhatsApp(){
   const msg = `📘 Quiz Title: ${quizTitle}\n👤 Student: ${student}\n\n${scoreText}\n\n${details}`;
 
   // ✅ Corrected number (example: +91 8069409455 → 918069409455)
-  const phone = "918069409455";  
+  const phone = "916003582005";  
 
   window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`, "_blank");
 }
@@ -1070,7 +1070,7 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
     const payload = `⚠️ Reported Mistake / Have a Doubt\nQuiz: ${quizTitle}\nStudent: ${student}\n\n${msg}`;
-    window.open(`https://wa.me/9108069409455?text=${encodeURIComponent(payload)}`, "_blank");
+    window.open(`https://wa.me/916003582005?text=${encodeURIComponent(payload)}`, "_blank");
     document.getElementById('reportModal').style.display = "none";
     document.getElementById('reportMsg').value = "";
   };
@@ -1087,3 +1087,4 @@ document.addEventListener('DOMContentLoaded', () => {
 </script>
 </body>
 </html>
+
